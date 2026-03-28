@@ -1164,32 +1164,6 @@ if st.session_state.transcript:
             except Exception as e:
                 st.error(f"생성 실패: {e}")
 
-    # ── 내 제목 평가 ──
-    if st.session_state.analysis:
-        st.markdown('<div class="section-header">내 제목 평가받기</div>', unsafe_allow_html=True)
-        my_title = st.text_input(
-            "내 제목",
-            placeholder="직접 생각한 제목을 입력하세요",
-            label_visibility="collapsed",
-            key="my_title_input",
-        )
-        eval_clicked = st.button("💬 평가", type="primary", key="eval_title_btn")
-
-        if eval_clicked and my_title.strip():
-            selected_ids = st.session_state.get("selected_ref_videos", set())
-            ref_vids = []
-            if st.session_state.get("similar_videos") and selected_ids:
-                ref_vids = [sv for sv in st.session_state.similar_videos if sv["video_id"] in selected_ids]
-            with st.spinner("제목을 평가하는 중..."):
-                try:
-                    result = evaluate_title(my_title.strip(), st.session_state.transcript, ref_vids)
-                    st.session_state["title_eval_result"] = result
-                except Exception as e:
-                    st.error(f"평가 실패: {e}")
-
-        if st.session_state.get("title_eval_result"):
-            st.markdown(st.session_state["title_eval_result"])
-
     # ── 결과 ──
     if st.session_state.titles:
         st.markdown(f'<div class="section-header">추천 제목 <span style="color:#DFFF32;background:#18181B;padding:2px 10px;border-radius:6px;font-size:16px;">{len(st.session_state.titles)}개</span></div>', unsafe_allow_html=True)
@@ -1222,23 +1196,17 @@ if st.session_state.transcript:
 
         # 추출된 프레임이 있으면 선택 UI
         if not thumb_upload and st.session_state.get("video_frames"):
-            st.markdown('<div style="color:#71717A;font-size:12px;margin-bottom:8px;">영상에서 추출한 장면 (클릭하여 선택)</div>', unsafe_allow_html=True)
+            st.markdown('<div style="color:#71717A;font-size:12px;margin-bottom:8px;">장면 선택</div>', unsafe_allow_html=True)
             if "selected_frame" not in st.session_state:
                 st.session_state.selected_frame = 0
-            # HTML flexbox로 모바일에서도 가로 배치
-            frames_html = '<div style="display:flex;gap:6px;overflow-x:auto;">'
+            frame_cols = st.columns(len(st.session_state.video_frames))
             for i, frame in enumerate(st.session_state.video_frames):
-                border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid #E4E4E7"
-                frames_html += f'<img src="{frame}" style="min-width:30%;max-width:30%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};flex-shrink:0;">'
-            frames_html += '</div>'
-            st.markdown(frames_html, unsafe_allow_html=True)
-            # 선택 버튼은 st.columns로 (번호만)
-            btn_cols = st.columns(len(st.session_state.video_frames))
-            for i in range(len(st.session_state.video_frames)):
-                with btn_cols[i]:
-                    if st.button(f"{i+1}", key=f"frame_{i}", type="primary" if i == st.session_state.selected_frame else "secondary"):
+                with frame_cols[i]:
+                    border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid #E4E4E7"
+                    if st.button("ㅤ", key=f"frame_{i}"):
                         st.session_state.selected_frame = i
                         st.rerun()
+                    st.markdown(f'<img src="{frame}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};margin-top:-10px;">', unsafe_allow_html=True)
             thumb_bg_url = st.session_state.video_frames[st.session_state.selected_frame]
 
         # 채널 정보 (참고 채널 첫 번째 또는 기본값)
@@ -1377,6 +1345,32 @@ if st.session_state.transcript:
     if st.session_state.get("_thumbnail_analysis"):
         with st.expander("🖼️ 썸네일 문구 분석 결과", expanded=False):
             st.markdown(st.session_state["_thumbnail_analysis"])
+
+    # ── 내 제목 평가 ── (제목 생성 후에만 표시)
+    if st.session_state.titles:
+        st.markdown('<div class="section-header">내 제목 평가받기</div>', unsafe_allow_html=True)
+        my_title = st.text_input(
+            "내 제목",
+            placeholder="직접 생각한 제목을 입력하세요",
+            label_visibility="collapsed",
+            key="my_title_input",
+        )
+        eval_clicked = st.button("💬 평가", type="primary", key="eval_title_btn")
+
+        if eval_clicked and my_title.strip():
+            selected_ids = st.session_state.get("selected_ref_videos", set())
+            ref_vids = []
+            if st.session_state.get("similar_videos") and selected_ids:
+                ref_vids = [sv for sv in st.session_state.similar_videos if sv["video_id"] in selected_ids]
+            with st.spinner("제목을 평가하는 중..."):
+                try:
+                    result = evaluate_title(my_title.strip(), st.session_state.transcript, ref_vids)
+                    st.session_state["title_eval_result"] = result
+                except Exception as e:
+                    st.error(f"평가 실패: {e}")
+
+        if st.session_state.get("title_eval_result"):
+            st.markdown(st.session_state["title_eval_result"])
 
     # ── 새 영상 분석 ──
     st.divider()
