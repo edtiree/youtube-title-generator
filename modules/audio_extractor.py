@@ -92,8 +92,11 @@ def _parse_vtt(raw: str) -> str:
             continue
         if "-->" in line or line.isdigit():
             continue
-        # HTML 태그 제거
-        clean = re.sub(r'<[^>]+>', '', line).strip()
+        # HTML 태그 + 엔티티 제거
+        import html as _html
+        clean = re.sub(r'<[^>]+>', '', line)
+        clean = _html.unescape(clean)
+        clean = re.sub(r'[>>]+', '', clean).strip()
         if clean and clean not in seen:
             seen.add(clean)
             texts.append(clean)
