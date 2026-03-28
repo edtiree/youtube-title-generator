@@ -96,7 +96,8 @@ def _parse_vtt(raw: str) -> str:
         import html as _html
         clean = re.sub(r'<[^>]+>', '', line)
         clean = _html.unescape(clean)
-        clean = re.sub(r'[>>]+', '', clean).strip()
+        clean = re.sub(r'[>>]+', '', clean)
+        clean = re.sub(r'\[(?:웃음|음악|박수|拍手|笑|Music|Applause|Laughter)\]', '', clean).strip()
         if clean and clean not in seen:
             seen.add(clean)
             texts.append(clean)
