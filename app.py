@@ -1229,14 +1229,20 @@ if st.session_state.transcript:
         # 추출된 프레임이 있으면 선택 UI
         if not thumb_upload and st.session_state.get("video_frames"):
             st.markdown('<div style="color:#71717A;font-size:12px;margin-bottom:8px;">영상에서 추출한 장면 (클릭하여 선택)</div>', unsafe_allow_html=True)
-            frame_cols = st.columns(len(st.session_state.video_frames))
             if "selected_frame" not in st.session_state:
                 st.session_state.selected_frame = 0
+            # HTML flexbox로 모바일에서도 가로 배치
+            frames_html = '<div style="display:flex;gap:6px;overflow-x:auto;">'
             for i, frame in enumerate(st.session_state.video_frames):
-                with frame_cols[i]:
-                    border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid #E4E4E7"
-                    st.markdown(f'<img src="{frame}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};cursor:pointer;">', unsafe_allow_html=True)
-                    if st.button("선택", key=f"frame_{i}", type="primary" if i == st.session_state.selected_frame else "secondary"):
+                border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid #E4E4E7"
+                frames_html += f'<img src="{frame}" style="min-width:30%;max-width:30%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};flex-shrink:0;">'
+            frames_html += '</div>'
+            st.markdown(frames_html, unsafe_allow_html=True)
+            # 선택 버튼은 st.columns로 (번호만)
+            btn_cols = st.columns(len(st.session_state.video_frames))
+            for i in range(len(st.session_state.video_frames)):
+                with btn_cols[i]:
+                    if st.button(f"{i+1}", key=f"frame_{i}", type="primary" if i == st.session_state.selected_frame else "secondary"):
                         st.session_state.selected_frame = i
                         st.rerun()
             thumb_bg_url = st.session_state.video_frames[st.session_state.selected_frame]
