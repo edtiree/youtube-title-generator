@@ -532,8 +532,15 @@ with st.sidebar:
 # 메인
 # ══════════════════════════════════════════
 
-# query param 처리 (프레임 선택용)
+# query param 처리
 _qp_frame = st.query_params.get("frame")
+_qp_open = st.query_params.get("open")
+if _qp_open:
+    st.query_params.clear()
+    try:
+        _load_project_to_session(_qp_open)
+    except Exception:
+        st.session_state.page = "home"
 if _qp_frame is not None:
     st.query_params.clear()
 
@@ -555,19 +562,28 @@ if st.session_state.page == "home":
     _home_projects = list_projects(_current_user)
     if _home_projects:
         st.markdown('<div style="font-size:16px;font-weight:700;color:#18181B;margin:32px 0 16px;">최근 프로젝트</div>', unsafe_allow_html=True)
-        for row_start in range(0, len(_home_projects), 3):
-            row_projs = _home_projects[row_start:row_start+3]
-            cols = st.columns(3)
-            for ci, proj in enumerate(row_projs):
-                with cols[ci]:
-                    pid = proj["project_id"]
-                    name = proj["name"][:30] + ("..." if len(proj["name"]) > 30 else "")
-                    vtype = proj.get("video_type", "")
-                    date_str = proj.get("updated_at", "")[:10].replace("-", ".")
-                    label = f"{name}  |  {vtype} · {date_str}"
-                    if st.button(label, key=f"open_{pid}", use_container_width=True):
-                        _load_project_to_session(pid)
-                        st.rerun()
+        cards_html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">'
+        for proj in _home_projects:
+            pid = proj["project_id"]
+            name = proj["name"][:30] + ("..." if len(proj["name"]) > 30 else "")
+            thumb = proj.get("video_thumbnail", "")
+            vtype = proj.get("video_type", "")
+            date_str = proj.get("updated_at", "")[:10].replace("-", ".")
+            if thumb:
+                thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;">'
+            else:
+                thumb_html = '<div style="width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#F4F4F5,#E4E4E7);display:flex;align-items:center;justify-content:center;font-size:24px;">🎬</div>'
+            cards_html += f'''<a href="?open={pid}" target="_self" style="text-decoration:none;color:inherit;">
+                <div style="border:1px solid #E4E4E7;border-radius:10px;overflow:hidden;">
+                    {thumb_html}
+                    <div style="padding:8px 10px 6px;">
+                        <div style="font-size:12px;font-weight:600;color:#18181B;line-height:1.3;">{name}</div>
+                        <div style="font-size:10px;color:#A1A1AA;margin-top:3px;">{vtype} · {date_str}</div>
+                    </div>
+                </div>
+            </a>'''
+        cards_html += '</div>'
+        st.markdown(cards_html, unsafe_allow_html=True)
 
     st.stop()
 
