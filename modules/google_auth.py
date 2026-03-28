@@ -7,7 +7,16 @@ import requests
 import streamlit as st
 import extra_streamlit_components as stx
 
-ALLOWED_EMAILS = os.environ.get("ALLOWED_EMAILS", "").split(",")
+def _get_secret(key, default=""):
+    val = os.environ.get(key)
+    if val:
+        return val
+    try:
+        return st.secrets.get(key, default)
+    except Exception:
+        return default
+
+ALLOWED_EMAILS = _get_secret("ALLOWED_EMAILS", "").split(",")
 
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
@@ -20,15 +29,15 @@ COOKIE_EXPIRY_DAYS = 30
 
 
 def _client_id():
-    return os.environ.get("GOOGLE_CLIENT_ID", "")
+    return _get_secret("GOOGLE_CLIENT_ID")
 
 
 def _client_secret():
-    return os.environ.get("GOOGLE_CLIENT_SECRET", "")
+    return _get_secret("GOOGLE_CLIENT_SECRET")
 
 
 def _redirect_uri():
-    return os.environ.get("REDIRECT_URI", "http://localhost:8501")
+    return _get_secret("REDIRECT_URI", "http://localhost:8501")
 
 
 def get_login_url():

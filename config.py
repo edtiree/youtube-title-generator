@@ -3,10 +3,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+def _get_secret(key, default=None):
+    """환경변수 → st.secrets 순서로 읽는다."""
+    val = os.getenv(key)
+    if val:
+        return val
+    try:
+        import streamlit as st
+        return st.secrets.get(key, default)
+    except Exception:
+        return default
+
+
 # API Keys
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+OPENAI_API_KEY = _get_secret("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = _get_secret("ANTHROPIC_API_KEY")
+YOUTUBE_API_KEY = _get_secret("YOUTUBE_API_KEY")
 
 # Target YouTube Channels (비즈니스/자기계발 인터뷰 채널)
 TARGET_CHANNELS = {
