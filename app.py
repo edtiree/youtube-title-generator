@@ -1196,31 +1196,27 @@ if st.session_state.transcript:
 
         # 추출된 프레임이 있으면 선택 UI
         if not thumb_upload and st.session_state.get("video_frames"):
-            st.markdown('<div style="color:#71717A;font-size:12px;margin-bottom:8px;">장면 선택</div>', unsafe_allow_html=True)
+            st.markdown('<div style="color:#71717A;font-size:12px;margin-bottom:8px;">장면 선택 (터치하여 선택)</div>', unsafe_allow_html=True)
             if "selected_frame" not in st.session_state:
                 st.session_state.selected_frame = 0
-            # 이미지 + 클릭 영역을 한 행에 배치
-            _fcols = st.columns(len(st.session_state.video_frames))
+            # query param으로 프레임 선택 감지
+            _qp = st.query_params.get("frame")
+            if _qp is not None:
+                try:
+                    _fi = int(_qp)
+                    if 0 <= _fi < len(st.session_state.video_frames):
+                        st.session_state.selected_frame = _fi
+                except ValueError:
+                    pass
+                st.query_params.clear()
+                st.rerun()
+            # 이미지 클릭 = 링크로 query param 전달
+            frames_html = '<div style="display:flex;gap:6px;">'
             for i, frame in enumerate(st.session_state.video_frames):
-                with _fcols[i]:
-                    border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid transparent"
-                    st.markdown(f'<img src="{frame}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};">', unsafe_allow_html=True)
-            # 모바일에서 st.columns가 세로로 쌓이므로 flexbox 백업
-            st.markdown("""<style>
-            [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] img[style*="aspect-ratio"]) {
-                display: flex !important; flex-wrap: nowrap !important;
-            }
-            [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] img[style*="aspect-ratio"]) > [data-testid="stColumn"] {
-                flex: 1 !important; min-width: 0 !important;
-            }
-            </style>""", unsafe_allow_html=True)
-            # 선택 버튼 (이미지 바로 아래, 최소 크기)
-            _bcols = st.columns(len(st.session_state.video_frames))
-            for i in range(len(st.session_state.video_frames)):
-                with _bcols[i]:
-                    if st.button("선택" if i != st.session_state.selected_frame else "✓", key=f"frame_{i}", use_container_width=True):
-                        st.session_state.selected_frame = i
-                        st.rerun()
+                border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid transparent"
+                frames_html += f'<a href="?frame={i}" target="_self" style="flex:1;min-width:0;display:block;"><img src="{frame}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};display:block;"></a>'
+            frames_html += '</div>'
+            st.markdown(frames_html, unsafe_allow_html=True)
             thumb_bg_url = st.session_state.video_frames[st.session_state.selected_frame]
 
         # 채널 정보 (참고 채널 첫 번째 또는 기본값)
