@@ -483,8 +483,9 @@ def _load_project_to_session(project_id: str):
     st.session_state.input_type = data.get("input_type", "")
     st.session_state.input_name = data.get("input_name", "")
     st.session_state.ref_channels = data.get("ref_channels", [])
-    st.session_state.video_frames = []
-    st.session_state.video_thumbnail = None
+    st.session_state.video_frames = None
+    st.session_state.video_thumbnail = data.get("video_thumbnail")
+    st.session_state.selected_frame = 0
 
 # ── 사이드바 ──
 with st.sidebar:
@@ -539,11 +540,17 @@ if st.session_state.page == "home":
     _qp_del = st.query_params.get("del")
     if _qp_open:
         st.query_params.clear()
-        _load_project_to_session(_qp_open)
+        try:
+            _load_project_to_session(_qp_open)
+        except Exception as e:
+            st.error(f"프로젝트 로드 실패: {e}")
         st.rerun()
     if _qp_del:
         st.query_params.clear()
-        delete_project(_current_user, _qp_del)
+        try:
+            delete_project(_current_user, _qp_del)
+        except Exception:
+            pass
         st.rerun()
 
     st.markdown('<div class="hero-title">유튜브 제목 생성기</div>', unsafe_allow_html=True)
