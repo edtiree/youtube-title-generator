@@ -1,0 +1,12 @@
+credentials:
+  usernames:
+    admin:
+      name: 관리자
+      password: $2b$12$6bX50j0e.kdgfoIHlA4XLusO7NpvB.hjb46jOlKXXyS.rZxS3mYI.
+    friend:
+      name: 친구
+      password: $2b$12$uBKlLehgZtws0v41GcNd1.luQ/x5oiZcASeDxodr123kAG3EL/q8u
+cookie:
+  expiry_days: 30
+  key: youtube_title_gen_secret_key_2024
+  name: ytitle_auth

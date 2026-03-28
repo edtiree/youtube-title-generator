@@ -1,0 +1,23 @@
+Similar Korean YouTube Channels (Interview-style: Jobs, Income, Business, Career, People's Success Stories)
+=============================================================================================================
+
+Excluded reference channels: 휴먼스토리, 돈벌쥐, 고고직장인, 일터뷰, 머니로드, 직업의온도, 머니멘터리
+
+channel_id -> channel_name
+--------------------------
+
+UCIueALBHAyPPU7e7C2zVYRQ -> 직업의모든것
+UClSUMM1_Ptww_Xe8AJJ9aPA -> 30대 자영업자 이야기
+UC-EGSdvtv-2DU0379QyjamQ -> 갈때까지간 남자
+UCfY7XL2ON1YhPJdAA-OGaZQ -> 까레라이스TV
+UCLE8p8wtDGSNEPv2w0OG8yg -> 잼뱅TV
+UCBMBPRnwRgl3aJZDEpTu65Q -> 장사의신
+UCjHn_Os5NoCXZyoXzuKth9w -> 소비더머니
+UCQ2DWm5Md16Dc3xRwwhVE7Q -> EO (이오)
+UC1OHZ026QjrO7MVO8VtNAEg -> 스타트업잡스
+UCvil4OAt-zShzkKHsg9EQAw -> 김작가 TV
+UCwx6n_4OcLgzAGdty0RWCoA -> 워크맨-Workman
+UCgheNMc3gGHLsT-RISdCzDQ -> 세바시 강연 Sebasi Talk
+UCITJ-PqHIr9fzk-rSQXeWEg -> 반전인생
+UCPR3eX5oGzNi_tPjd4MolvQ -> 고수감별사
+UCsJ6RuBiTVWRX156FVbeaGg -> 슈카월드

@@ -1,0 +1,14 @@
+.env
+data/channel_cache.json
+data/channels.json
+__pycache__/
+*.pyc
+*.mp3
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.wav
+data/projects/
+.DS_Store
+.claude/
