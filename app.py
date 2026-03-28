@@ -554,12 +554,25 @@ if st.session_state.page == "home":
                     delete_project(_current_user, proj["project_id"])
                     st.rerun()
 
-    st.markdown('<div class="section-header" style="margin-top:32px;">새 프로젝트 시작</div>', unsafe_allow_html=True)
+    if st.button("➕ 새 프로젝트 생성", type="primary", use_container_width=True):
+        st.session_state.page = "new_project"
+        for key in ["transcript", "analysis", "similar_videos", "titles", "search_keywords", "video_type", "video_thumbnail", "video_frames", "selected_frame"]:
+            st.session_state[key] = None
+        st.session_state.current_project_id = None
+        st.session_state.project_name = ""
+        st.rerun()
 
-# ── 영상 입력 (홈에서만) ──
+    st.stop()
+
+# ── 영상 입력 (새 프로젝트 화면) ──
 uploaded_file = None
 youtube_url = ""
-if st.session_state.page == "home":
+if st.session_state.page == "new_project":
+    st.markdown('<span class="hero-badge">AI Powered</span>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-title">새 프로젝트</div>', unsafe_allow_html=True)
+    if st.button("← 홈으로", key="back_home"):
+        st.session_state.page = "home"
+        st.rerun()
     tab1, tab2, tab3 = st.tabs(["📁 파일 업로드", "🔗 YouTube 링크", "📝 대본 직접 입력"])
     direct_script = ""
 
@@ -595,12 +608,11 @@ if st.session_state.page == "home":
                 _auto_save_project()
                 st.rerun()
 
-# 홈 화면: 스크립트 추출은 허용, 나머지는 멈춤
-if st.session_state.page == "home":
+# 새 프로젝트 화면: 스크립트 추출은 허용, 나머지는 멈춤
+if st.session_state.page == "new_project":
     needs_extraction = uploaded_file or (youtube_url and is_youtube_url(youtube_url))
     if needs_extraction and not st.session_state.transcript:
         if st.button("🎙️ 스크립트 추출 & 프로젝트 생성", type="primary", use_container_width=True):
-            # URL/파일 정보를 세션에 저장 후 프로젝트 페이지로 전환
             if youtube_url:
                 st.session_state["_pending_youtube_url"] = youtube_url
             st.session_state.page = "project"
@@ -1394,7 +1406,8 @@ if st.session_state.transcript:
 
     # ── 새 영상 분석 ──
     st.divider()
-    if st.button("🔄 새 영상 분석하기", use_container_width=True):
+    if st.button("🏠 홈으로", use_container_width=True):
+        st.session_state.page = "home"
         for key in ["transcript", "analysis", "similar_videos", "titles", "search_keywords", "video_type", "video_thumbnail", "video_frames", "selected_frame"]:
             st.session_state[key] = None
         st.session_state.current_project_id = None
