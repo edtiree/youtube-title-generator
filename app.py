@@ -576,7 +576,7 @@ if st.session_state.page == "home":
                             <div style="font-size:10px;color:#A1A1AA;margin-top:3px;">{vtype} · {date_str}</div>
                         </div>
                     </div>''', unsafe_allow_html=True)
-                    if st.button("ㅤ", key=f"open_{pid}", use_container_width=True, label_visibility="collapsed"):
+                    if st.button("ㅤ", key=f"open_{pid}", use_container_width=True):
                         _load_project_to_session(pid)
                         st.rerun()
 
