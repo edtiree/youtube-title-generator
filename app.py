@@ -547,39 +547,42 @@ if st.session_state.page == "home":
 
     # 내 프로젝트 목록
     _home_projects = list_projects(_current_user)
+
+    # query param으로 프로젝트 열기/삭제 감지
+    _qp_open = st.query_params.get("open")
+    _qp_del = st.query_params.get("del")
+    if _qp_open:
+        st.query_params.clear()
+        _load_project_to_session(_qp_open)
+        st.rerun()
+    if _qp_del:
+        st.query_params.clear()
+        delete_project(_current_user, _qp_del)
+        st.rerun()
+
     if _home_projects:
         st.markdown('<div style="font-size:16px;font-weight:700;color:#18181B;margin:32px 0 16px;">최근 프로젝트</div>', unsafe_allow_html=True)
-        # HTML 카드 그리드
         cards_html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;">'
         for proj in _home_projects:
+            pid = proj["project_id"]
             name = proj["name"][:40] + ("..." if len(proj["name"]) > 40 else "")
             thumb = proj.get("video_thumbnail", "")
             vtype = proj.get("video_type", "")
             date_str = proj.get("updated_at", "")[:10].replace("-", ".")
-            thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px 8px 0 0;">' if thumb else f'<div style="width:100%;aspect-ratio:16/9;background:#F4F4F5;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;color:#A1A1AA;font-size:28px;">📄</div>'
-            cards_html += f'''<div style="background:#fff;border:1px solid #E4E4E7;border-radius:12px;overflow:hidden;">
-                {thumb_html}
-                <div style="padding:10px 12px 12px;">
-                    <div style="font-size:13px;font-weight:600;color:#18181B;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{name}</div>
-                    <div style="font-size:11px;color:#A1A1AA;margin-top:6px;">{vtype} · {date_str}</div>
+            thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;">' if thumb else '<div style="width:100%;aspect-ratio:16/9;background:#F4F4F5;display:flex;align-items:center;justify-content:center;color:#A1A1AA;font-size:28px;">📄</div>'
+            cards_html += f'''<a href="?open={pid}" target="_self" style="text-decoration:none;color:inherit;">
+                <div style="background:#fff;border:1px solid #E4E4E7;border-radius:12px;overflow:hidden;transition:box-shadow 0.2s;">
+                    {thumb_html}
+                    <div style="padding:10px 12px 8px;">
+                        <div style="font-size:13px;font-weight:600;color:#18181B;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{name}</div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+                            <span style="font-size:11px;color:#A1A1AA;">{vtype} · {date_str}</span>
+                        </div>
+                    </div>
                 </div>
-            </div>'''
+            </a>'''
         cards_html += '</div>'
         st.markdown(cards_html, unsafe_allow_html=True)
-
-        # 열기/삭제 버튼 (카드 아래)
-        st.markdown('<div style="margin-top:16px;"></div>', unsafe_allow_html=True)
-        for proj in _home_projects:
-            name_short = proj["name"][:20] + ("..." if len(proj["name"]) > 20 else "")
-            bc1, bc2 = st.columns([5, 1])
-            with bc1:
-                if st.button(f"📂 {name_short}", key=f"home_load_{proj['project_id']}", use_container_width=True):
-                    _load_project_to_session(proj["project_id"])
-                    st.rerun()
-            with bc2:
-                if st.button("🗑", key=f"home_del_{proj['project_id']}"):
-                    delete_project(_current_user, proj["project_id"])
-                    st.rerun()
 
     st.stop()
 
