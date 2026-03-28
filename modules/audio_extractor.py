@@ -27,16 +27,25 @@ def download_youtube_subtitle(url: str) -> str:
     if not video_id:
         raise RuntimeError("올바른 YouTube URL이 아닙니다.")
 
-    ytt_api = YouTubeTranscriptApi()
-
-    # 한국어 → 영어 순서로 시도
+    # 신규 API (v1.0+)
     for langs in [["ko"], ["en"], ["ko", "en", "ja"]]:
         try:
+            ytt_api = YouTubeTranscriptApi()
             transcript = ytt_api.fetch(video_id, languages=langs)
-            texts = [s.text for s in transcript.snippets]
+            if hasattr(transcript, 'snippets'):
+                texts = [s.text for s in transcript.snippets]
+            else:
+                texts = [s['text'] for s in transcript]
             return " ".join(texts)
         except Exception:
-            continue
+            pass
+
+    # 구형 API (v0.x) fallback
+    try:
+        transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=["ko", "en"])
+        return " ".join([s['text'] for s in transcript_list])
+    except Exception:
+        pass
 
     raise RuntimeError("자막을 찾을 수 없습니다. '파일 업로드' 또는 '대본 직접 입력'을 이용해주세요.")
 
