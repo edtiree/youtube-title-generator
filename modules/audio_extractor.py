@@ -27,27 +27,32 @@ def download_youtube_subtitle(url: str) -> str:
     if not video_id:
         raise RuntimeError("올바른 YouTube URL이 아닙니다.")
 
+    errors = []
+
     # 신규 API (v1.0+)
-    for langs in [["ko"], ["en"], ["ko", "en", "ja"]]:
-        try:
-            ytt_api = YouTubeTranscriptApi()
-            transcript = ytt_api.fetch(video_id, languages=langs)
-            if hasattr(transcript, 'snippets'):
-                texts = [s.text for s in transcript.snippets]
-            else:
-                texts = [s['text'] for s in transcript]
-            return " ".join(texts)
-        except Exception:
-            pass
+    try:
+        ytt_api = YouTubeTranscriptApi()
+        for langs in [["ko"], ["en"], ["ko", "en", "ja"]]:
+            try:
+                transcript = ytt_api.fetch(video_id, languages=langs)
+                if hasattr(transcript, 'snippets'):
+                    texts = [s.text for s in transcript.snippets]
+                else:
+                    texts = [s['text'] for s in transcript]
+                return " ".join(texts)
+            except Exception as e:
+                errors.append(f"fetch({langs}): {e}")
+    except Exception as e:
+        errors.append(f"new API init: {e}")
 
     # 구형 API (v0.x) fallback
     try:
         transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=["ko", "en"])
         return " ".join([s['text'] for s in transcript_list])
-    except Exception:
-        pass
+    except Exception as e:
+        errors.append(f"old API: {e}")
 
-    raise RuntimeError("자막을 찾을 수 없습니다. '파일 업로드' 또는 '대본 직접 입력'을 이용해주세요.")
+    raise RuntimeError(f"자막을 찾을 수 없습니다. 상세: {'; '.join(errors[:3])}")
 
 
 def _extract_video_id(url: str) -> str:
