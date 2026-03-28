@@ -544,10 +544,15 @@ if st.session_state.page == "home":
         for proj in _home_projects:
             name = proj["name"][:30] + ("..." if len(proj["name"]) > 30 else "")
             vtype = proj.get("video_type", "")
-            badge = f'<span style="font-size:11px;color:#71717A;background:#F4F4F5;padding:2px 8px;border-radius:4px;margin-left:8px;">{vtype}</span>' if vtype else ""
-            if st.button(f"{name}  {vtype}", key=f"home_load_{proj['project_id']}", use_container_width=True):
-                _load_project_to_session(proj["project_id"])
-                st.rerun()
+            pc1, pc2 = st.columns([5, 1])
+            with pc1:
+                if st.button(f"{name}  {vtype}", key=f"home_load_{proj['project_id']}", use_container_width=True):
+                    _load_project_to_session(proj["project_id"])
+                    st.rerun()
+            with pc2:
+                if st.button("🗑", key=f"home_del_{proj['project_id']}"):
+                    delete_project(_current_user, proj["project_id"])
+                    st.rerun()
 
     st.markdown('<div class="section-header" style="margin-top:32px;">새 프로젝트 시작</div>', unsafe_allow_html=True)
 
