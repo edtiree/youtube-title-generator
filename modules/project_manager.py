@@ -63,6 +63,7 @@ def list_projects(username: str) -> List[dict]:
             "created_at": d.get("created_at", ""),
             "updated_at": d.get("updated_at", ""),
             "video_type": d.get("video_type", ""),
+            "video_thumbnail": d.get("video_thumbnail", ""),
         })
     return projects
 

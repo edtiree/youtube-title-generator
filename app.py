@@ -442,6 +442,7 @@ def _auto_save_project():
         "input_type": st.session_state.get("input_type", ""),
         "input_name": st.session_state.get("input_name", ""),
         "ref_channels": st.session_state.get("ref_channels", []),
+        "video_thumbnail": st.session_state.get("video_thumbnail", ""),
     }
     pid = save_project(_current_user, data, st.session_state.current_project_id)
     st.session_state.current_project_id = pid
@@ -540,19 +541,32 @@ if st.session_state.page == "home":
     # 내 프로젝트 목록
     _home_projects = list_projects(_current_user)
     if _home_projects:
-        st.markdown('<div class="section-header">내 프로젝트</div>', unsafe_allow_html=True)
-        for proj in _home_projects:
-            name = proj["name"][:30] + ("..." if len(proj["name"]) > 30 else "")
-            vtype = proj.get("video_type", "")
-            pc1, pc2 = st.columns([5, 1])
-            with pc1:
-                if st.button(f"{name}  {vtype}", key=f"home_load_{proj['project_id']}", use_container_width=True):
-                    _load_project_to_session(proj["project_id"])
-                    st.rerun()
-            with pc2:
-                if st.button("🗑", key=f"home_del_{proj['project_id']}"):
-                    delete_project(_current_user, proj["project_id"])
-                    st.rerun()
+        st.markdown('<div class="section-header">최근 프로젝트</div>', unsafe_allow_html=True)
+        # 2열 그리드
+        for row_start in range(0, len(_home_projects), 2):
+            cols = st.columns(2)
+            for ci, proj in enumerate(_home_projects[row_start:row_start+2]):
+                with cols[ci]:
+                    name = proj["name"][:30] + ("..." if len(proj["name"]) > 30 else "")
+                    thumb = proj.get("video_thumbnail", "")
+                    vtype = proj.get("video_type", "")
+                    date_str = proj.get("updated_at", "")[:10].replace("-", ".")
+                    # 썸네일 카드
+                    thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;">' if thumb else '<div style="width:100%;aspect-ratio:16/9;background:#F4F4F5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#A1A1AA;font-size:24px;">📄</div>'
+                    st.markdown(f'''<div style="margin-bottom:4px;">
+                        {thumb_html}
+                        <div style="font-size:13px;font-weight:600;margin-top:6px;line-height:1.4;color:#18181B;">{name}</div>
+                        <div style="font-size:11px;color:#A1A1AA;margin-top:2px;">{vtype} · {date_str}</div>
+                    </div>''', unsafe_allow_html=True)
+                    bc1, bc2 = st.columns([3, 1])
+                    with bc1:
+                        if st.button("열기", key=f"home_load_{proj['project_id']}", use_container_width=True):
+                            _load_project_to_session(proj["project_id"])
+                            st.rerun()
+                    with bc2:
+                        if st.button("🗑", key=f"home_del_{proj['project_id']}"):
+                            delete_project(_current_user, proj["project_id"])
+                            st.rerun()
 
     if st.button("➕ 새 프로젝트 생성", type="primary", use_container_width=True):
         st.session_state.page = "new_project"
