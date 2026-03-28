@@ -12,7 +12,7 @@ def _get_db():
     if not firebase_admin._apps:
         try:
             import streamlit as st
-            config = json.loads(st.secrets["FIREBASE_CONFIG"])
+            config = dict(st.secrets["FIREBASE"])
         except Exception:
             import os
             config = json.loads(os.getenv("FIREBASE_CONFIG", "{}"))
