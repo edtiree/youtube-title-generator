@@ -566,17 +566,11 @@ if st.session_state.page == "home":
                     vtype = proj.get("video_type", "")
                     date_str = proj.get("updated_at", "")[:10].replace("-", ".")
                     if thumb:
-                        thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px 8px 0 0;">'
+                        thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;">'
                     else:
-                        thumb_html = '<div style="width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#F4F4F5,#E4E4E7);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;font-size:24px;">🎬</div>'
-                    st.markdown(f'''<div style="border:1px solid #E4E4E7;border-radius:10px;overflow:hidden;margin-bottom:8px;">
-                        {thumb_html}
-                        <div style="padding:8px 10px 6px;">
-                            <div style="font-size:12px;font-weight:600;color:#18181B;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{name}</div>
-                            <div style="font-size:10px;color:#A1A1AA;margin-top:3px;">{vtype} · {date_str}</div>
-                        </div>
-                    </div>''', unsafe_allow_html=True)
-                    if st.button("ㅤ", key=f"open_{pid}", use_container_width=True):
+                        thumb_html = '<div style="width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#F4F4F5,#E4E4E7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;">🎬</div>'
+                    st.markdown(thumb_html, unsafe_allow_html=True)
+                    if st.button(f"{name}\n{vtype} · {date_str}", key=f"open_{pid}", use_container_width=True):
                         _load_project_to_session(pid)
                         st.rerun()
 
