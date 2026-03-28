@@ -1222,7 +1222,11 @@ if st.session_state.transcript:
                 frames_html += f'<a href="?frame={i}" target="_self" style="flex:1;min-width:0;display:block;"><img src="{frame}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};display:block;"></a>'
             frames_html += '</div>'
             st.markdown(frames_html, unsafe_allow_html=True)
-            thumb_bg_url = st.session_state.video_frames[st.session_state.selected_frame]
+            _sel = st.session_state.get("selected_frame", 0)
+            if _sel >= len(st.session_state.video_frames):
+                _sel = 0
+                st.session_state.selected_frame = 0
+            thumb_bg_url = st.session_state.video_frames[_sel]
 
         # 채널 정보 (참고 채널 첫 번째 또는 기본값)
         _ch_name = "내 채널"
