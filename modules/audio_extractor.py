@@ -19,18 +19,14 @@ def _get_ytdlp_path():
 
 
 def download_youtube_subtitle(url: str) -> str:
-    """YouTube URL에서 자막을 텍스트로 추출한다. 다운로드 불필요, 빠르고 무료."""
-    from youtube_transcript_api import YouTubeTranscriptApi
-
-    # URL에서 video ID 추출
+    """YouTube URL에서 자막을 텍스트로 추출한다."""
     video_id = _extract_video_id(url)
     if not video_id:
         raise RuntimeError("올바른 YouTube URL이 아닙니다.")
 
-    errors = []
-
-    # 신규 API (v1.0+)
+    # 1차: youtube-transcript-api
     try:
+        from youtube_transcript_api import YouTubeTranscriptApi
         ytt_api = YouTubeTranscriptApi()
         for langs in [["ko"], ["en"], ["ko", "en", "ja"]]:
             try:
@@ -40,19 +36,68 @@ def download_youtube_subtitle(url: str) -> str:
                 else:
                     texts = [s['text'] for s in transcript]
                 return " ".join(texts)
-            except Exception as e:
-                errors.append(f"fetch({langs}): {e}")
-    except Exception as e:
-        errors.append(f"new API init: {e}")
+            except Exception:
+                pass
+    except Exception:
+        pass
 
-    # 구형 API (v0.x) fallback
+    # 2차: yt-dlp 자막 추출 (클라우드 IP 차단 우회)
     try:
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=["ko", "en"])
-        return " ".join([s['text'] for s in transcript_list])
-    except Exception as e:
-        errors.append(f"old API: {e}")
+        result = _ytdlp_subtitle(url)
+        if result and len(result.strip()) > 50:
+            return result
+    except Exception:
+        pass
 
-    raise RuntimeError(f"자막을 찾을 수 없습니다. 상세: {'; '.join(errors[:3])}")
+    raise RuntimeError("자막을 찾을 수 없습니다. '파일 업로드' 또는 '대본 직접 입력'을 이용해주세요.")
+
+
+def _ytdlp_subtitle(url: str) -> str:
+    """yt-dlp로 자막을 추출한다."""
+    tmp_dir = tempfile.mkdtemp()
+    out_path = os.path.join(tmp_dir, "sub")
+    cmd = [
+        _get_ytdlp_path(),
+        "--write-auto-sub", "--write-sub",
+        "--sub-lang", "ko,en",
+        "--sub-format", "vtt",
+        "--skip-download",
+        "--no-playlist", "--no-warnings",
+        "-o", out_path,
+        url,
+    ]
+    try:
+        subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        # vtt 파일 찾기
+        for fname in os.listdir(tmp_dir):
+            if fname.endswith(".vtt"):
+                vtt_path = os.path.join(tmp_dir, fname)
+                with open(vtt_path, "r", encoding="utf-8") as f:
+                    raw = f.read()
+                return _parse_vtt(raw)
+    finally:
+        import shutil as _sh
+        _sh.rmtree(tmp_dir, ignore_errors=True)
+    return ""
+
+
+def _parse_vtt(raw: str) -> str:
+    """VTT 자막 파일에서 텍스트만 추출한다."""
+    lines = raw.split("\n")
+    texts = []
+    seen = set()
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("WEBVTT") or line.startswith("Kind:") or line.startswith("Language:"):
+            continue
+        if "-->" in line or line.isdigit():
+            continue
+        # HTML 태그 제거
+        clean = re.sub(r'<[^>]+>', '', line).strip()
+        if clean and clean not in seen:
+            seen.add(clean)
+            texts.append(clean)
+    return " ".join(texts)
 
 
 def _extract_video_id(url: str) -> str:
