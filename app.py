@@ -555,6 +555,11 @@ if st.session_state.page == "home":
     _home_projects = list_projects(_current_user)
     if _home_projects:
         st.markdown('<div style="font-size:16px;font-weight:700;color:#18181B;margin:32px 0 16px;">최근 프로젝트</div>', unsafe_allow_html=True)
+        # 카드 하단 버튼 최소화 CSS
+        st.markdown("""<style>
+        .card-btn button { padding:2px 0 !important; font-size:0 !important; min-height:8px !important; height:8px !important; border:none !important; background:transparent !important; }
+        .card-btn button:hover { background:#F4F4F5 !important; }
+        </style>""", unsafe_allow_html=True)
         for row_start in range(0, len(_home_projects), 3):
             row_projs = _home_projects[row_start:row_start+3]
             cols = st.columns(3)
@@ -566,13 +571,22 @@ if st.session_state.page == "home":
                     vtype = proj.get("video_type", "")
                     date_str = proj.get("updated_at", "")[:10].replace("-", ".")
                     if thumb:
-                        thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;">'
+                        thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px 10px 0 0;">'
                     else:
-                        thumb_html = '<div style="width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#F4F4F5,#E4E4E7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;">🎬</div>'
-                    st.markdown(thumb_html, unsafe_allow_html=True)
-                    if st.button(f"{name}\n{vtype} · {date_str}", key=f"open_{pid}", use_container_width=True):
-                        _load_project_to_session(pid)
-                        st.rerun()
+                        thumb_html = '<div style="width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#F4F4F5,#E4E4E7);border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;font-size:24px;">🎬</div>'
+                    st.markdown(f'''<div style="border:1px solid #E4E4E7;border-radius:10px;overflow:hidden;">
+                        {thumb_html}
+                        <div style="padding:8px 10px 6px;">
+                            <div style="font-size:12px;font-weight:600;color:#18181B;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{name}</div>
+                            <div style="font-size:10px;color:#A1A1AA;margin-top:3px;">{vtype} · {date_str}</div>
+                        </div>
+                    </div>''', unsafe_allow_html=True)
+                    with st.container():
+                        st.markdown('<div class="card-btn">', unsafe_allow_html=True)
+                        if st.button("ㅤ", key=f"open_{pid}", use_container_width=True):
+                            _load_project_to_session(pid)
+                            st.rerun()
+                        st.markdown('</div>', unsafe_allow_html=True)
 
     st.stop()
 
