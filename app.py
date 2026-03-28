@@ -1279,8 +1279,9 @@ if st.session_state.transcript:
                 size = base_size if len(line) <= 8 else max(base_size - 4, 14)
                 thumb_html_lines += f'<span style="display:block;color:{color};font-size:{size}px;font-weight:900;-webkit-text-stroke:1.5px #000;paint-order:stroke fill;line-height:1.35;letter-spacing:-0.5px;">{line}</span>'
 
-            # 레퍼런스 매칭
-            references = td.get("references", [])
+            # 레퍼런스 매칭 (유사 영상 선택한 경우에만 표시)
+            selected_ids = st.session_state.get("selected_ref_videos", set())
+            references = td.get("references", []) if selected_ids else []
             ref_html = ""
 
             def _find_ref_video(ref_text):
