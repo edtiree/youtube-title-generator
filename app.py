@@ -531,28 +531,28 @@ with st.sidebar:
 # ══════════════════════════════════════════
 # 메인
 # ══════════════════════════════════════════
+
+# query param 처리 (카드 클릭 → rerun 없이 바로 전환)
+_qp_open = st.query_params.get("open")
+_qp_del = st.query_params.get("del")
+_qp_frame = st.query_params.get("frame")
+if _qp_open:
+    st.query_params.clear()
+    try:
+        _load_project_to_session(_qp_open)
+    except Exception:
+        st.session_state.page = "home"
+if _qp_del:
+    st.query_params.clear()
+    try:
+        delete_project(_current_user, _qp_del)
+    except Exception:
+        pass
+
 # ══════════════════════════════════════════
 # 홈 화면
 # ══════════════════════════════════════════
 if st.session_state.page == "home":
-    # query param 우선 처리 (카드 클릭)
-    _qp_open = st.query_params.get("open")
-    _qp_del = st.query_params.get("del")
-    if _qp_open:
-        st.query_params.clear()
-        try:
-            _load_project_to_session(_qp_open)
-        except Exception as e:
-            st.error(f"프로젝트 로드 실패: {e}")
-        st.rerun()
-    if _qp_del:
-        st.query_params.clear()
-        try:
-            delete_project(_current_user, _qp_del)
-        except Exception:
-            pass
-        st.rerun()
-
     st.markdown('<div class="hero-title">유튜브 제목 생성기</div>', unsafe_allow_html=True)
     st.markdown('<div class="hero-sub">대본을 입력하면 AI가 분석하고, 클릭을 부르는 최적의 제목을 만들어 드립니다.</div>', unsafe_allow_html=True)
 
@@ -1243,17 +1243,14 @@ if st.session_state.transcript:
             st.markdown('<div style="color:#71717A;font-size:12px;margin-bottom:8px;">장면 선택 (터치하여 선택)</div>', unsafe_allow_html=True)
             if "selected_frame" not in st.session_state:
                 st.session_state.selected_frame = 0
-            # query param으로 프레임 선택 감지
-            _qp = st.query_params.get("frame")
-            if _qp is not None:
+            # query param으로 프레임 선택 감지 (상단에서 이미 처리됨)
+            if _qp_frame is not None and st.session_state.get("video_frames"):
                 try:
-                    _fi = int(_qp)
+                    _fi = int(_qp_frame)
                     if 0 <= _fi < len(st.session_state.video_frames):
                         st.session_state.selected_frame = _fi
                 except ValueError:
                     pass
-                st.query_params.clear()
-                st.rerun()
             # 이미지 클릭 = 링크로 query param 전달
             frames_html = '<div style="display:flex;gap:6px;">'
             for i, frame in enumerate(st.session_state.video_frames):
