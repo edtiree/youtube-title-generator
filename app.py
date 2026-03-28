@@ -565,15 +565,18 @@ if st.session_state.page == "home":
                     thumb = proj.get("video_thumbnail", "")
                     vtype = proj.get("video_type", "")
                     date_str = proj.get("updated_at", "")[:10].replace("-", ".")
-                    thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px 8px 0 0;">' if thumb else '<div style="width:100%;aspect-ratio:16/9;background:#F4F4F5;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;color:#A1A1AA;font-size:28px;">📄</div>'
-                    st.markdown(f'''<div style="border:1px solid #E4E4E7;border-radius:12px;overflow:hidden;margin-bottom:4px;">
+                    if thumb:
+                        thumb_html = f'<img src="{thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px 8px 0 0;">'
+                    else:
+                        thumb_html = '<div style="width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#F4F4F5,#E4E4E7);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;font-size:32px;">🎬</div>'
+                    st.markdown(f'''<div style="border:1px solid #E4E4E7;border-radius:12px;overflow:hidden;margin-bottom:4px;cursor:pointer;">
                         {thumb_html}
                         <div style="padding:10px 12px 8px;">
-                            <div style="font-size:13px;font-weight:600;color:#18181B;line-height:1.4;">{name}</div>
+                            <div style="font-size:13px;font-weight:600;color:#18181B;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{name}</div>
                             <div style="font-size:11px;color:#A1A1AA;margin-top:4px;">{vtype} · {date_str}</div>
                         </div>
                     </div>''', unsafe_allow_html=True)
-                    if st.button("열기", key=f"open_{pid}", use_container_width=True):
+                    if st.button("열기", key=f"open_{pid}", use_container_width=True, type="secondary"):
                         _load_project_to_session(pid)
                         st.rerun()
 
