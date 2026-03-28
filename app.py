@@ -1199,23 +1199,28 @@ if st.session_state.transcript:
             st.markdown('<div style="color:#71717A;font-size:12px;margin-bottom:8px;">장면 선택</div>', unsafe_allow_html=True)
             if "selected_frame" not in st.session_state:
                 st.session_state.selected_frame = 0
-            # 프레임 번호 선택 (숨긴 라디오)
-            _frame_idx = st.radio(
-                "프레임", range(len(st.session_state.video_frames)),
-                index=st.session_state.selected_frame,
-                format_func=lambda x: f"장면 {x+1}",
-                horizontal=True, label_visibility="collapsed", key="frame_radio"
-            )
-            if _frame_idx != st.session_state.selected_frame:
-                st.session_state.selected_frame = _frame_idx
-                st.rerun()
-            # HTML flexbox로 가로 배치
-            frames_html = '<div style="display:flex;gap:6px;">'
+            # 이미지 + 클릭 영역을 한 행에 배치
+            _fcols = st.columns(len(st.session_state.video_frames))
             for i, frame in enumerate(st.session_state.video_frames):
-                border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid #E4E4E7"
-                frames_html += f'<img src="{frame}" style="flex:1;min-width:0;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};">'
-            frames_html += '</div>'
-            st.markdown(frames_html, unsafe_allow_html=True)
+                with _fcols[i]:
+                    border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid transparent"
+                    st.markdown(f'<img src="{frame}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};">', unsafe_allow_html=True)
+            # 모바일에서 st.columns가 세로로 쌓이므로 flexbox 백업
+            st.markdown("""<style>
+            [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] img[style*="aspect-ratio"]) {
+                display: flex !important; flex-wrap: nowrap !important;
+            }
+            [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] img[style*="aspect-ratio"]) > [data-testid="stColumn"] {
+                flex: 1 !important; min-width: 0 !important;
+            }
+            </style>""", unsafe_allow_html=True)
+            # 선택 버튼 (이미지 바로 아래, 최소 크기)
+            _bcols = st.columns(len(st.session_state.video_frames))
+            for i in range(len(st.session_state.video_frames)):
+                with _bcols[i]:
+                    if st.button("선택" if i != st.session_state.selected_frame else "✓", key=f"frame_{i}", use_container_width=True):
+                        st.session_state.selected_frame = i
+                        st.rerun()
             thumb_bg_url = st.session_state.video_frames[st.session_state.selected_frame]
 
         # 채널 정보 (참고 채널 첫 번째 또는 기본값)
