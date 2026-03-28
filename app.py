@@ -818,17 +818,14 @@ if st.session_state.transcript:
         # 검색 키워드 표시 & 수정
         st.markdown('<div class="section-header">유사 영상 검색</div>', unsafe_allow_html=True)
         st.markdown('<div style="color:#71717A;font-size:13px;font-weight:500;margin-bottom:8px;">검색 키워드 (쉼표로 구분, 수정 가능)</div>', unsafe_allow_html=True)
-        kw_col, btn_col = st.columns([4, 1])
-        with kw_col:
-            edited_kw = st.text_input(
-                "검색 키워드",
-                value=st.session_state.search_keywords or "",
-                placeholder="예: 유튜브 수익화, 북한 콘텐츠, AI 영상",
-                label_visibility="collapsed",
-                key="kw_input",
-            )
-        with btn_col:
-            search_clicked = st.button("🔍 검색", type="primary", key="search_similar_btn")
+        edited_kw = st.text_input(
+            "검색 키워드",
+            value=st.session_state.search_keywords or "",
+            placeholder="예: 유튜브 수익화, 북한 콘텐츠, AI 영상",
+            label_visibility="collapsed",
+            key="kw_input",
+        )
+        search_clicked = st.button("🔍 검색", type="primary", key="search_similar_btn")
 
         # 키워드 파싱
         search_kw_list = [k.strip() for k in edited_kw.split(",") if k.strip()] if edited_kw else []
@@ -1170,16 +1167,13 @@ if st.session_state.transcript:
     # ── 내 제목 평가 ──
     if st.session_state.analysis:
         st.markdown('<div class="section-header">내 제목 평가받기</div>', unsafe_allow_html=True)
-        eval_col, eval_btn_col = st.columns([4, 1])
-        with eval_col:
-            my_title = st.text_input(
-                "내 제목",
-                placeholder="직접 생각한 제목을 입력하세요",
-                label_visibility="collapsed",
-                key="my_title_input",
-            )
-        with eval_btn_col:
-            eval_clicked = st.button("💬 평가", type="primary", key="eval_title_btn")
+        my_title = st.text_input(
+            "내 제목",
+            placeholder="직접 생각한 제목을 입력하세요",
+            label_visibility="collapsed",
+            key="my_title_input",
+        )
+        eval_clicked = st.button("💬 평가", type="primary", key="eval_title_btn")
 
         if eval_clicked and my_title.strip():
             selected_ids = st.session_state.get("selected_ref_videos", set())
