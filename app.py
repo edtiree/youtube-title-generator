@@ -534,21 +534,7 @@ with st.sidebar:
 # 홈 화면
 # ══════════════════════════════════════════
 if st.session_state.page == "home":
-    st.markdown('<div class="hero-title">유튜브 제목 생성기</div>', unsafe_allow_html=True)
-    st.markdown('<div class="hero-sub">대본을 입력하면 AI가 분석하고, 클릭을 부르는 최적의 제목을 만들어 드립니다.</div>', unsafe_allow_html=True)
-
-    if st.button("➕ 새로 추가하기", type="primary"):
-        st.session_state.page = "new_project"
-        for key in ["transcript", "analysis", "similar_videos", "titles", "search_keywords", "video_type", "video_thumbnail", "video_frames", "selected_frame"]:
-            st.session_state[key] = None
-        st.session_state.current_project_id = None
-        st.session_state.project_name = ""
-        st.rerun()
-
-    # 내 프로젝트 목록
-    _home_projects = list_projects(_current_user)
-
-    # query param으로 프로젝트 열기/삭제 감지
+    # query param 우선 처리 (카드 클릭)
     _qp_open = st.query_params.get("open")
     _qp_del = st.query_params.get("del")
     if _qp_open:
@@ -560,6 +546,18 @@ if st.session_state.page == "home":
         delete_project(_current_user, _qp_del)
         st.rerun()
 
+    st.markdown('<div class="hero-title">유튜브 제목 생성기</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-sub">대본을 입력하면 AI가 분석하고, 클릭을 부르는 최적의 제목을 만들어 드립니다.</div>', unsafe_allow_html=True)
+
+    if st.button("➕ 새로 추가하기", type="primary"):
+        st.session_state.page = "new_project"
+        for key in ["transcript", "analysis", "similar_videos", "titles", "search_keywords", "video_type", "video_thumbnail", "video_frames", "selected_frame"]:
+            st.session_state[key] = None
+        st.session_state.current_project_id = None
+        st.session_state.project_name = ""
+        st.rerun()
+
+    _home_projects = list_projects(_current_user)
     if _home_projects:
         st.markdown('<div style="font-size:16px;font-weight:700;color:#18181B;margin:32px 0 16px;">최근 프로젝트</div>', unsafe_allow_html=True)
         cards_html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;">'
