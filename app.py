@@ -1199,14 +1199,23 @@ if st.session_state.transcript:
             st.markdown('<div style="color:#71717A;font-size:12px;margin-bottom:8px;">장면 선택</div>', unsafe_allow_html=True)
             if "selected_frame" not in st.session_state:
                 st.session_state.selected_frame = 0
-            frame_cols = st.columns(len(st.session_state.video_frames))
+            # 프레임 번호 선택 (숨긴 라디오)
+            _frame_idx = st.radio(
+                "프레임", range(len(st.session_state.video_frames)),
+                index=st.session_state.selected_frame,
+                format_func=lambda x: f"장면 {x+1}",
+                horizontal=True, label_visibility="collapsed", key="frame_radio"
+            )
+            if _frame_idx != st.session_state.selected_frame:
+                st.session_state.selected_frame = _frame_idx
+                st.rerun()
+            # HTML flexbox로 가로 배치
+            frames_html = '<div style="display:flex;gap:6px;">'
             for i, frame in enumerate(st.session_state.video_frames):
-                with frame_cols[i]:
-                    border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid #E4E4E7"
-                    if st.button("ㅤ", key=f"frame_{i}"):
-                        st.session_state.selected_frame = i
-                        st.rerun()
-                    st.markdown(f'<img src="{frame}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};margin-top:-10px;">', unsafe_allow_html=True)
+                border = "3px solid #DFFF32" if i == st.session_state.selected_frame else "2px solid #E4E4E7"
+                frames_html += f'<img src="{frame}" style="flex:1;min-width:0;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:{border};">'
+            frames_html += '</div>'
+            st.markdown(frames_html, unsafe_allow_html=True)
             thumb_bg_url = st.session_state.video_frames[st.session_state.selected_frame]
 
         # 채널 정보 (참고 채널 첫 번째 또는 기본값)
