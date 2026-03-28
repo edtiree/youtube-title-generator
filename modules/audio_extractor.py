@@ -3,7 +3,6 @@ import re
 import shutil
 import subprocess
 import tempfile
-from pydub import AudioSegment
 from config import AUDIO_BITRATE, AUDIO_SAMPLE_RATE, AUDIO_CHANNELS, MAX_CHUNK_SIZE_MB, CHUNK_OVERLAP_SECONDS
 
 
@@ -136,6 +135,7 @@ def chunk_audio_if_needed(audio_path: str, max_size_mb: float = MAX_CHUNK_SIZE_M
     if file_size_mb <= max_size_mb:
         return [audio_path]
 
+    from pydub import AudioSegment
     audio = AudioSegment.from_mp3(audio_path)
     total_ms = len(audio)
 
